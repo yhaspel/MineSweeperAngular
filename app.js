@@ -12,17 +12,14 @@ var defaultNumOfMines = 6;
 
 var rows = localStorage.getItem('rows');
 var columns = localStorage.getItem('columns');
-;
 var numOfMines = localStorage.getItem('numOfMines');
-;
-
 
 var revCounter = 0;
-var mymod = angular.module("mymodule", ['ui.bootstrap']);
+var mymod = angular.module("mymodule", ['ui.bootstrap', 'ngAnimate']);
 var valArr = [];
 
 var generateRandomMines = function (numOfMines) {
-    var arr = []
+    var arr = [];
     while (arr.length < numOfMines) {
         var randomnumber1 = Math.floor(Math.random() * rows);
         var randomnumber2 = Math.floor(Math.random() * columns);
@@ -163,8 +160,68 @@ mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
     };
 });
 
+var restartGame = function () {
+    console.log("Restart Game!")
+    rows = localStorage.getItem('rows');
+    columns = localStorage.getItem('columns');
+    numOfMines = localStorage.getItem('numOfMines');
 
-mymod.controller("BoardController", function BoardController($scope, $uibModal, $log, flagService) {
+    if (numOfMines > rows * columns - 1) {
+        numOfMines = rows * columns - 1;
+    }
+    revCounter = 0;
+    valArr = [];
+    mines = generateRandomMines(numOfMines);
+
+    // mine cheatsheet
+    for (var i = 0; i < mines.length; i++) {
+        console.log(mines[i]);
+    }
+
+    // initiate value array
+    for (var i = 0; i < rows; i++) {
+        valArr[i] = [];
+        for (var j = 0; j < columns; j++) {
+            valArr[i][j] = {'value': assignMines(i, j), 'revealed': false};
+        }
+    }
+    // count mine neighbors in value array
+    assignProximityCount();
+}
+
+
+mymod.controller("BoardController", function BoardController($scope, $uibModal, $log, $sce, flagService) {
+    // popover
+    $scope.checkReload = function () {
+        console.log('TEST');
+    };
+
+    $scope.dynamicPopover = {
+        templateUrl: 'myPopoverTemplate.html',
+        rows: 5,
+        columns: 6,
+        mines: 6
+    };
+
+    $scope.placement = {
+        options: [
+            'top',
+            'top-left',
+            'top-right',
+            'bottom',
+            'bottom-left',
+            'bottom-right',
+            'left',
+            'left-top',
+            'left-bottom',
+            'right',
+            'right-top',
+            'right-bottom'
+        ],
+        selected: 'top'
+    };
+    // end popover
+
     // Modal
     $scope.items = ['Zehava Galon', 'Naftali Bennett', 'Ada Yonat'];
     $scope.message = 'test';
@@ -194,6 +251,8 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     };
     // end modal section
 
+    $scope.face = "4";// TODO: find a way to engage icon
+
     var oldSelected = $scope.selected;
     $scope.getSelected = function () {
         if (oldSelected !== $scope.selected) {
@@ -210,19 +269,26 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
         }
     };
 
-    $scope.canClick = true;
-    $scope.board = [];
-    for (var i = 0; i < rows; i++) {
-        $scope.board[i] = [];
-        for (var j = 0; j < columns; j++) {
-            if (valArr[i][j]['value'] === "\uD83D\uDCA3") {
-                $scope.board[i][j] = {mine: true};
-            }
-            else {
-                $scope.board[i][j] = {mine: false};
+
+    $scope.resetBoard = function () {
+        $scope.canClick = true;
+        flagService.setFlagCount(localStorage.getItem('numOfMines'));
+        $scope.board = [];
+        for (var i = 0; i < rows; i++) {
+            $scope.board[i] = [];
+            for (var j = 0; j < columns; j++) {
+                if (valArr[i][j]['value'] === "\uD83D\uDCA3") {
+                    $scope.board[i][j] = {mine: true};
+                }
+                else {
+                    $scope.board[i][j] = {mine: false};
+                }
             }
         }
-    }
+    };
+
+    $scope.resetBoard();
+
     var outOfBounds = function (i, j) {
         return (i < 0 || j < 0 || i > rows - 1 || j > columns - 1);
     };
@@ -286,6 +352,9 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     };
 
     $scope.flagToggle = function (cell) {
+        if (!($scope.canClick)) {
+            return;
+        }
         for (var i = 0; i < $scope.board.length; i++) {
             for (var j = 0; j < $scope.board[i].length; j++) {
                 if ($scope.board[i][j] === cell) {
@@ -305,8 +374,8 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
                 }
             }
         }
-        console.log('flags: ',flagService.getFlagCounts(),' | mines: ',numOfMines);
-        if (flagService.getFlagCounts() === 0){
+        console.log('flags: ', flagService.getFlagCounts(), ' | mines: ', numOfMines);
+        if (flagService.getFlagCounts() === 0) {
             $scope.toggle(false);
         }
         else {
@@ -346,18 +415,33 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
         for (var i = 0; i < $scope.board.length; i++) {
             for (var j = 0; j < $scope.board[i].length; j++) {
                 if (valArr[i][j]['value'] === "\uD83D\uDCA3") {
-                    $scope.board[i][j].val1 = "\uD83D\uDCA3";
-                    $scope.board[i][j].myClass = colorClasses[9];
+                    if ($scope.board[i][j].val1 === "\u2691") {
+                        $scope.board[i][j].myClass = 'correctFlag';
+                    }
+                    else {
+                        $scope.board[i][j].val1 = "\uD83D\uDCA3";
+                        $scope.board[i][j].myClass = colorClasses[9];
+                    }
+
+                }
+                else if ($scope.board[i][j].val1 === "\u2691") {
+                    $scope.board[i][j].myClass = 'incorrectFlag';
+                }
+                else {
+                    $scope.board[i][j].val1 = valArr[i][j]['value'];
+                    $scope.board[i][j].myClass = colorClasses[valArr[i][j]['value']];
                 }
             }
         }
     };
 
     var gameOver = function (won) {
+        $scope.toggle(true);
         $scope.canClick = false;
         if (won) {
             $scope.message = "Good Job! You Won!";
             $scope.open();
+            showAllMines();
             flagService.stopCounter();
         }
         else {
@@ -366,25 +450,29 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
             showAllMines();
             flagService.stopCounter();
         }
-    }
+    };
 
     $scope.restartGame = function (diff) {
         if (diff === 'easy') {
             localStorage.setItem('rows', 5);
             localStorage.setItem('columns', 6);
             localStorage.setItem('numOfMines', 6);
-        }
-        if (diff === 'medium') {
+        } else if (diff === 'medium') {
             localStorage.setItem('rows', 9);
             localStorage.setItem('columns', 9);
             localStorage.setItem('numOfMines', 12);
-        }
-        if (diff === 'difficult') {
+        } else if (diff === 'difficult') {
             localStorage.setItem('rows', 20);
             localStorage.setItem('columns', 20);
             localStorage.setItem('numOfMines', 40);
         }
-        location.reload();
+        else {
+            localStorage.setItem('rows', $scope.dynamicPopover.rows);
+            localStorage.setItem('columns', $scope.dynamicPopover.columns);
+            localStorage.setItem('numOfMines', $scope.dynamicPopover.mines);
+        }
+        restartGame();
+        $scope.resetBoard();
     }
 
     $scope.isCellClear = function (cell) {
@@ -417,33 +505,16 @@ mymod.controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items
 
 
 var init = function () {
-    if (localStorage.getItem('rows') == null) {
+    //Actual reload only happens if no values are in localStorage
+    if (localStorage.getItem('rows') == null
+        || localStorage.getItem('columns') == null
+        || localStorage.getItem('numOfMines') == null) {
         localStorage.setItem('rows', defaultRows);
-        location.reload();
-    }
-    if (localStorage.getItem('columns') == null) {
         localStorage.setItem('columns', defaultColumns);
-        location.reload();
-    }
-    if (localStorage.getItem('numOfMines') == null) {
         localStorage.setItem('numOfMines', defaultNumOfMines);
         location.reload();
     }
-    // mine cheatsheet
-    for (var i = 0; i < mines.length; i++) {
-        console.log(mines[i]);
-    }
-
-    // initiate value array
-    for (var i = 0; i < rows; i++) {
-        valArr[i] = [];
-        for (var j = 0; j < columns; j++) {
-            valArr[i][j] = {'value': assignMines(i, j), 'revealed': false};
-        }
-    }
-    // count mine neighbors in value array
-    assignProximityCount();
-
+    restartGame();
 };
 
 init();

@@ -3,6 +3,10 @@ h1, h3, h2, h4 {
     font-style: italic;
 }
 
+html body {
+    background-color: #e0e0e0;
+}
+
 h5 {
     font-style: italic;
 }
@@ -14,51 +18,74 @@ h4 {
 .author {
     margin-top: 0;
 }
+
 .red.cell {
+    box-shadow: none;
     background-color: red;
 }
 
+.correctFlag.cell {
+    box-shadow: none;
+    color: darkgreen;
+    background-color: #9acfea;
+}
+
+.incorrectFlag.cell {
+    box-shadow: none;
+    color: red;
+    background-color: #e4b9b9;
+}
+
 .pink.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: pink;
 }
 
 .hotpink.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: hotpink;
 }
 
 .blue.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: blue;
 }
 
 .green.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: green;
 }
 
 .darkgreen.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: darkgreen;
 }
 
 .brown.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: brown;
 }
 
 .darkred.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: darkred;
 }
 
 .darkblue.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: darkblue;
 }
 
 .purple.cell {
+    box-shadow: none;
     background-color: whitesmoke;
     color: purple;
 }
@@ -80,7 +107,7 @@ span:hover {
 }
 
 .cell {
-    width: 120px;
+    width: 60px;
     height: 60px;
     float: left;
     font-size: large;
@@ -89,8 +116,8 @@ span:hover {
     line-height: 60px;
     cursor: pointer;
 
-    max-width: 5%;
-    max-height: 3%;
+    max-width: 10%;
+    max-height: 10%;
 
     background: gray;
 
@@ -110,7 +137,6 @@ span:hover {
 
 .cell:hover {
     background-color: #afd9ee;
-    border: solid 2px black;
     color: #122b40;
 }
 
@@ -127,10 +153,15 @@ span:hover {
     justify-content: center;
 }
 
+.faceDisplay {
+    width: 60px;
+    height: auto;
+}
+
 .mineDisplay {
     border: outset 4px gray;
-    width: 70px;
-    text-align: right;
+    width: 100px;
+    text-align: center;
     height: inherit;
     background-color: black;
     color: red;
@@ -142,7 +173,7 @@ span:hover {
 
 .timeDisplay {
     border: outset 4px gray;
-    width: 150px;
+    width: 100px;
     text-align: right;
     height: inherit;
     background-color: black;
@@ -153,3 +184,28 @@ span:hover {
     font-style: italic;
 }
 
+.btn-default {
+    color: floralwhite;
+    text-shadow: 2px 2px 2px black;
+    padding: 10px;
+    height: auto;
+    background: #666666;
+    border: 1px solid #000000;
+    -moz-box-shadow: inset 2px 2px 2px rgba(255, 255, 255, .4), inset -2px -2px 2px rgba(0, 0, 0, .4);
+    -webkit-box-shadow: inset 2px 2px 2px rgba(255, 255, 255, .4), inset -2px -2px 2px rgba(0, 0, 0, .4);
+    box-shadow: inset 2px 2px 2px rgba(255, 255, 255, .4), inset -2px -2px 2px rgba(0, 0, 0, .4);
+}
+
+/*.destroy {*/
+    /*overflow: hidden;*/
+/*}*/
+
+.destroy {
+    transition: all linear 0.5s;
+    height: 2.5em;
+}
+
+.destroy.ng-hide {
+    opacity: 0;
+    height: 0;
+}
