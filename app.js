@@ -18,7 +18,7 @@ var revCounter = 0;
 var mymod = angular.module("mymodule", ['ui.bootstrap', 'ngAnimate']);
 var valArr = [];
 
-var generateRandomMines = function (numOfMines) {
+var generateRandomMines = function () {
     var arr = [];
     while (arr.length < numOfMines) {
         var randomnumber1 = Math.floor(Math.random() * rows);
@@ -38,8 +38,7 @@ var generateRandomMines = function (numOfMines) {
     return arr;
 };
 
-var mines = generateRandomMines(numOfMines);
-
+var mines = null;
 
 var colorClasses = {
     0: 'pink',
@@ -93,6 +92,7 @@ var assignProximityCount = function () {
 mymod.service('flagService', function () {
     var flags = numOfMines;
     var time = true;
+    var showDiff = false;
 
     var setFlagCount = function (flagCount) {
         flags = flagCount;
@@ -110,11 +110,23 @@ mymod.service('flagService', function () {
         return time;
     };
 
+    var getDiff = function () {
+        console.log("getDiff:", showDiff);
+        return showDiff;
+    };
+
+    var toggleDiff = function () {
+        showDiff = !showDiff;
+        console.log("ToggleDiff:", showDiff);
+    };
+
     return {
         setFlagCount: setFlagCount,
         getFlagCounts: getFlagCount,
         stopCounter: stopCounter,
-        getCounter: getCounter
+        getCounter: getCounter,
+        getDiff: getDiff,
+        toggleDiff: toggleDiff
     };
 
 });
@@ -139,6 +151,7 @@ mymod.directive('ngRightClick', function ngRightClick($parse) {
 mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
     var timer;
     $scope.counter = 0;
+
     $scope.stopCounter = function () {
         $timeout.cancel(timer);
     };
@@ -161,7 +174,7 @@ mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
 });
 
 var restartGame = function () {
-    console.log("Restart Game!")
+    console.log("Restart Game!");
     rows = localStorage.getItem('rows');
     columns = localStorage.getItem('columns');
     numOfMines = localStorage.getItem('numOfMines');
@@ -223,7 +236,6 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     // end popover
 
     // Modal
-    $scope.items = ['Zehava Galon', 'Naftali Bennett', 'Ada Yonat'];
     $scope.message = 'test';
 
     $scope.open = function (size) {
@@ -234,9 +246,6 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
             controller: 'ModalInstanceCtrl',
             size: size,
             resolve: {
-                items: function () {
-                    return $scope.items;
-                },
                 message: function () {
                     return $scope.message;
                 }
@@ -252,22 +261,6 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     // end modal section
 
     $scope.face = "4";// TODO: find a way to engage icon
-
-    var oldSelected = $scope.selected;
-    $scope.getSelected = function () {
-        if (oldSelected !== $scope.selected) {
-            console.log('selected: ', $scope.selected);
-            if ($scope.selected === $scope.items[0]) {
-                $scope.restartGame('easy');
-            }
-            if ($scope.selected === $scope.items[1]) {
-                $scope.restartGame('medium');
-            }
-            if ($scope.selected === $scope.items[2]) {
-                $scope.restartGame('difficult');
-            }
-        }
-    };
 
 
     $scope.resetBoard = function () {
@@ -346,6 +339,10 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     };
 
     $scope.destroyBtn = true;
+
+
+    
+    // $scope.diffSettings = flagService.getDiffSettingsStatus();
 
     $scope.toggle = function (state) {
         $scope.destroyBtn = state;
@@ -487,19 +484,10 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
 });
 
 
-mymod.controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, items, message) {
-    $scope.items = items;
+mymod.controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, message) {
     $scope.messsge = message;
-    $scope.selected = {
-        item: $scope.items[0]
-    };
-
     $scope.ok = function () {
-        $uibModalInstance.close($scope.selected.item);
-    };
-
-    $scope.cancel = function () {
-        $uibModalInstance.dismiss('cancel');
+        $uibModalInstance.close($scope.message);
     };
 });
 
@@ -514,6 +502,10 @@ var init = function () {
         localStorage.setItem('numOfMines', defaultNumOfMines);
         location.reload();
     }
+
+    localStorage.setItem('rows', defaultRows);
+    localStorage.setItem('columns', defaultColumns);
+    localStorage.setItem('numOfMines', defaultNumOfMines);
     restartGame();
 };
 

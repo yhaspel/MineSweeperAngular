@@ -209,3 +209,13 @@ span:hover {
     opacity: 0;
     height: 0;
 }
+
+.difficultySettings {
+    transition: all linear 0.5s;
+    height: 2.5em;
+}
+
+.difficultySettings.ng-hide {
+    opacity: 0;
+    height: 0;
+}
