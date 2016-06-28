@@ -26,8 +26,9 @@
         <div class="mineDisplay">{{mines}}</div>
         </input>
 
-        <button class="btn btn-default faceDisplay" ng-click="flagService.toggleShowDiff()">
-        </button>
+        <div ng-mouseup="unclickEmoji()" ng-mousedown="clickEmoji()" ng-mouseleave="hoverLeave()" ng-mouseenter="hoverEnter()" class="faceDisplay" ng-click="flagService.toggleShowDiff()">
+            <img id="emoji" src="images/hugging-face.png">
+        </div>
 
         <input type="hidden" ng-bind="remoteStop()" ng-value="{{counter}}">
         <div class="timeDisplay">

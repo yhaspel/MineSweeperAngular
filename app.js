@@ -18,6 +18,10 @@ var revCounter = 0;
 var mymod = angular.module("mymodule", ['ui.bootstrap', 'ngAnimate']);
 var valArr = [];
 
+var mineCode = "\uD83D\uDCA3";
+var explosionCode = "\uD83D\uDCA5";
+var flagCode = "\u2691";
+
 var generateRandomMines = function () {
     var arr = [];
     while (arr.length < numOfMines) {
@@ -56,7 +60,7 @@ var colorClasses = {
 var assignMines = function (i, j) {
     for (var k = 0; k < mines.length; k++) {
         if (mines[k][0] === i && mines[k][1] === j) {
-            return "\uD83D\uDCA3";
+            return mineCode;
         }
     }
     return 0;
@@ -71,7 +75,7 @@ var countNeighbors = function (i, j) {
             if (i == k && j == l) {
                 continue;
             }
-            if (valArr[k][l]['value'] != "\uD83D\uDCA3") {
+            if (valArr[k][l]['value'] != mineCode) {
                 valArr[k][l]['value']++;
             }
         }
@@ -81,7 +85,7 @@ var countNeighbors = function (i, j) {
 var assignProximityCount = function () {
     for (var i = 0; i < valArr.length; i++) {
         for (var j = 0; j < valArr[i].length; j++) {
-            if (valArr[i][j]['value'] === "\uD83D\uDCA3") {
+            if (valArr[i][j]['value'] === mineCode) {
                 countNeighbors(i, j);
             }
 
@@ -101,7 +105,7 @@ mymod.service('flagService', class FlagService {
         this.time = false;
     }
 
-    setFlags(flags){
+    setFlags(flags) {
         this.flags = flags;
     }
 
@@ -131,6 +135,36 @@ mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
     $scope.flagService = flagService;
     var timer;
     $scope.counter = 0;
+
+    $scope.hoverEnter = function () {
+        console.log("enter");
+        var elem = document.getElementById('emoji');
+        console.log(elem);
+        elem.setAttribute('src', 'images/smiling-face-with-sunglasses.png');
+
+    };
+
+    $scope.hoverLeave = function () {
+        console.log("leave");
+        var elem = document.getElementById('emoji');
+        console.log(elem);
+        elem.setAttribute('src', 'images/hugging-face.png');
+    };
+
+    $scope.clickEmoji = function () {
+        console.log("click");
+        var elem = document.getElementById('emoji');
+        console.log(elem);
+        elem.setAttribute('src', 'images/astonished-face.png');
+    };
+
+    $scope.unclickEmoji = function () {
+        console.log("click");
+        var elem = document.getElementById('emoji');
+        console.log(elem);
+        elem.setAttribute('src', 'images/grimacing-face.png');
+    };
+
 
     $scope.stopCounter = function () {
         $timeout.cancel(timer);
@@ -253,7 +287,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
         for (var i = 0; i < rows; i++) {
             $scope.board[i] = [];
             for (var j = 0; j < columns; j++) {
-                if (valArr[i][j]['value'] === "\uD83D\uDCA3") {
+                if (valArr[i][j]['value'] === mineCode) {
                     $scope.board[i][j] = {mine: true};
                 }
                 else {
@@ -276,14 +310,14 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     $scope.destroyTiles = function () {
         for (var i = 0; i < $scope.board.length; i++) {
             for (var j = 0; j < $scope.board[i].length; j++) {
-                if (valArr[i][j]['value'] !== '\u2691' && valArr[i][j]['value'] !== '\uD83D\uDCA3') {
+                if (valArr[i][j]['value'] !== flagCode && valArr[i][j]['value'] !== mineCode) {
                     $scope.cellClicked($scope.board[i][j]);
                 }
             }
         }
         for (var i = 0; i < $scope.board.length; i++) {
             for (var j = 0; j < $scope.board[i].length; j++) {
-                if (valArr[i][j]['value'] !== '\u2691') {
+                if (valArr[i][j]['value'] !== flagCode) {
                     $scope.cellClicked($scope.board[i][j]);
                 }
             }
@@ -338,7 +372,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
             for (var j = 0; j < $scope.board[i].length; j++) {
                 if ($scope.board[i][j] === cell) {
                     if (!valArr[i][j]['revealed']) {
-                        if (cell.val1 === "\u2691") {
+                        if (cell.val1 === flagCode) {
                             cell.val1 = '';
                             flagService.setFlags(flagService.flags + 1);
                         }
@@ -346,7 +380,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
                             if (flagService.flags === 0) {
                                 return;
                             }
-                            cell.val1 = "\u2691";
+                            cell.val1 = flagCode;
                             flagService.setFlags(flagService.flags - 1);
                         }
                     }
@@ -367,7 +401,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
         if (!($scope.canClick)) {
             return;
         }
-        if (cell.val1 === "\u2691") {
+        if (cell.val1 === flagCode) {
             return;
         }
         if ($scope.isCellClear(cell)) {
@@ -380,7 +414,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
             }
         }
         else {
-            cell.val1 = "\uD83D\uDCA3";
+            cell.val1 = explosionCode;
             cell.myClass = colorClasses[9];
             gameOver(false);
         }
@@ -393,17 +427,20 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     var showAllMines = function () {
         for (var i = 0; i < $scope.board.length; i++) {
             for (var j = 0; j < $scope.board[i].length; j++) {
-                if (valArr[i][j]['value'] === "\uD83D\uDCA3") {
-                    if ($scope.board[i][j].val1 === "\u2691") {
+                if ($scope.board[i][j].val1 === explosionCode){
+                    continue;
+                }
+                if (valArr[i][j]['value'] === mineCode) {
+                    if ($scope.board[i][j].val1 === flagCode) {
                         $scope.board[i][j].myClass = 'correctFlag';
                     }
                     else {
-                        $scope.board[i][j].val1 = "\uD83D\uDCA3";
+                        $scope.board[i][j].val1 = mineCode;
                         $scope.board[i][j].myClass = colorClasses[9];
                     }
 
                 }
-                else if ($scope.board[i][j].val1 === "\u2691") {
+                else if ($scope.board[i][j].val1 === flagCode) {
                     $scope.board[i][j].myClass = 'incorrectFlag';
                 }
                 else {
