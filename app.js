@@ -89,46 +89,25 @@ var assignProximityCount = function () {
     }
 };
 
-mymod.service('flagService', function () {
-    var flags = numOfMines;
-    var time = true;
-    var showDiff = false;
 
-    var setFlagCount = function (flagCount) {
-        flags = flagCount;
-    };
+mymod.service('flagService', class FlagService {
+    constructor() {
+        this.flags = numOfMines;
+        this.time = true;
+        this.showDiff = false;
+    }
 
-    var getFlagCount = function () {
-        return flags;
-    };
+    stopCounter() {
+        this.time = false;
+    }
 
-    var stopCounter = function () {
-        time = false;
-    };
+    setFlags(flags){
+        this.flags = flags;
+    }
 
-    var getCounter = function () {
-        return time;
-    };
-
-    var getDiff = function () {
-        console.log("getDiff:", showDiff);
-        return showDiff;
-    };
-
-    var toggleDiff = function () {
-        showDiff = !showDiff;
-        console.log("ToggleDiff:", showDiff);
-    };
-
-    return {
-        setFlagCount: setFlagCount,
-        getFlagCounts: getFlagCount,
-        stopCounter: stopCounter,
-        getCounter: getCounter,
-        getDiff: getDiff,
-        toggleDiff: toggleDiff
-    };
-
+    toggleShowDiff() {
+        this.showDiff = !this.showDiff;
+    }
 });
 
 
@@ -149,6 +128,7 @@ mymod.directive('ngRightClick', function ngRightClick($parse) {
 });
 
 mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
+    $scope.flagService = flagService;
     var timer;
     $scope.counter = 0;
 
@@ -162,14 +142,14 @@ mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
     $scope.updateCounter();
 
     $scope.remoteStop = function () {
-        if (!flagService.getCounter()) {
+        if (!flagService.time) {
             $scope.stopCounter();
         }
     };
 
-    $scope.mines = flagService.getFlagCounts();
+    $scope.mines = flagService.flags;
     $scope.changeVal = function () {
-        $scope.mines = flagService.getFlagCounts();
+        $scope.mines = flagService.flags;
     };
 });
 
@@ -204,6 +184,8 @@ var restartGame = function () {
 
 
 mymod.controller("BoardController", function BoardController($scope, $uibModal, $log, $sce, flagService) {
+    $scope.flagService = flagService;
+
     // popover
     $scope.checkReload = function () {
         console.log('TEST');
@@ -264,8 +246,9 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
 
 
     $scope.resetBoard = function () {
+        flagService.toggleShowDiff();
         $scope.canClick = true;
-        flagService.setFlagCount(localStorage.getItem('numOfMines'));
+        flagService.setFlags(localStorage.getItem('numOfMines'));
         $scope.board = [];
         for (var i = 0; i < rows; i++) {
             $scope.board[i] = [];
@@ -341,7 +324,6 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     $scope.destroyBtn = true;
 
 
-    
     // $scope.diffSettings = flagService.getDiffSettingsStatus();
 
     $scope.toggle = function (state) {
@@ -358,21 +340,21 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
                     if (!valArr[i][j]['revealed']) {
                         if (cell.val1 === "\u2691") {
                             cell.val1 = '';
-                            flagService.setFlagCount(flagService.getFlagCounts() + 1);
+                            flagService.setFlags(flagService.flags + 1);
                         }
                         else {
-                            if (flagService.getFlagCounts() === 0) {
+                            if (flagService.flags === 0) {
                                 return;
                             }
                             cell.val1 = "\u2691";
-                            flagService.setFlagCount(flagService.getFlagCounts() - 1);
+                            flagService.setFlags(flagService.flags - 1);
                         }
                     }
                 }
             }
         }
-        console.log('flags: ', flagService.getFlagCounts(), ' | mines: ', numOfMines);
-        if (flagService.getFlagCounts() === 0) {
+        console.log('flags: ', flagService.flags, ' | mines: ', numOfMines);
+        if (flagService.flags === 0) {
             $scope.toggle(false);
         }
         else {
@@ -447,6 +429,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
             showAllMines();
             flagService.stopCounter();
         }
+        flagService.toggleShowDiff();
     };
 
     $scope.restartGame = function (diff) {

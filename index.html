@@ -26,7 +26,7 @@
         <div class="mineDisplay">{{mines}}</div>
         </input>
 
-        <button class="btn btn-default faceDisplay" ng-click="flagService.toggleDiff()">
+        <button class="btn btn-default faceDisplay" ng-click="flagService.toggleShowDiff()">
         </button>
 
         <input type="hidden" ng-bind="remoteStop()" ng-value="{{counter}}">
@@ -58,7 +58,7 @@
             <div class="btn btn-danger" ng-click="destroyTiles()">Destroy All</div>
         </div>
 
-        <div class="difficultySettings" ng-hide="flagService.getDiff()">
+        <div class="difficultySettings" ng-hide="flagService.showDiff">
             <h4>Difficulty</h4>
             <div class="btn-group">
                 <div class="btn btn-default" uib-popover="Easy" popover-trigger="mouseenter"
