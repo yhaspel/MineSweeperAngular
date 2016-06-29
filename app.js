@@ -109,7 +109,7 @@ mymod.service('flagService', class FlagService {
         this.flags = numOfMines;
         this.time = true;
         this.showDiff = false;
-        this.faceUrl = faceUrls[0];
+        this.faceUrl = null;
     }
 
     setFaceUrl(url) {
@@ -126,6 +126,10 @@ mymod.service('flagService', class FlagService {
 
     toggleShowDiff() {
         this.showDiff = !this.showDiff;
+    }
+
+    setShowDiff(status){
+        this.showDiff = status;
     }
 });
 
@@ -170,14 +174,10 @@ mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
 
 
     $scope.setFace = function () {
-        var elem = document.getElementById('emoji');
-        elem.setAttribute('src', flagService.faceUrl);
-        // flagService.setFaceUrl(faceUrls[3]);
+        $scope.selectedImg.src = flagService.faceUrl;
     };
-    
-    $scope.faceUrlSrc = flagService.faceUrl;
 
-    
+    $scope.selectedImg = {};
     
     $scope.stopCounter = function () {
         $timeout.cancel(timer);
@@ -286,7 +286,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
 
     $scope.resetBoard = function () {
 
-        flagService.toggleShowDiff();
+        flagService.setShowDiff(true);
         $scope.canClick = true;
         flagService.setFlags(localStorage.getItem('numOfMines'));
         $scope.board = [];
@@ -495,7 +495,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
             flagService.setFaceUrl(faceUrls[6]);
             flagService.stopCounter();
         }
-        flagService.toggleShowDiff();
+        flagService.setShowDiff(false);
     };
 
     $scope.restartGame = function (diff) {

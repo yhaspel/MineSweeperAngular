@@ -26,8 +26,8 @@
         <div class="mineDisplay">{{mines}}</div>
         </input>
 
-        <div  ng-mouseup="unclickEmoji()" ng-mousedown="clickEmoji()" ng-mouseleave="hoverLeave()" ng-mouseenter="hoverEnter()" class="faceDisplay" ng-click="flagService.toggleShowDiff()">
-            <img ng-model="setFace()" ng-src="{{faceUrlSrc}}" id="emoji">
+        <div ng-mouseup="unclickEmoji()" ng-mousedown="clickEmoji()" ng-mouseleave="hoverLeave()" ng-mouseenter="hoverEnter()" class="faceDisplay" ng-click="flagService.toggleShowDiff()">
+            <img ng-src="{{flagService.faceUrl}}" id="emoji">
         </div>
 
         <input type="hidden" ng-bind="remoteStop()" ng-value="{{counter}}">
