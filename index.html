@@ -26,8 +26,8 @@
         <div class="mineDisplay">{{mines}}</div>
         </input>
 
-        <div ng-mouseup="unclickEmoji()" ng-mousedown="clickEmoji()" ng-mouseleave="hoverLeave()" ng-mouseenter="hoverEnter()" class="faceDisplay" ng-click="flagService.toggleShowDiff()">
-            <img id="emoji" src="images/hugging-face.png">
+        <div  ng-mouseup="unclickEmoji()" ng-mousedown="clickEmoji()" ng-mouseleave="hoverLeave()" ng-mouseenter="hoverEnter()" class="faceDisplay" ng-click="flagService.toggleShowDiff()">
+            <img ng-model="setFace()" ng-src="{{faceUrlSrc}}" id="emoji">
         </div>
 
         <input type="hidden" ng-bind="remoteStop()" ng-value="{{counter}}">
@@ -52,7 +52,7 @@
 
         <div class="boardRow" ng-repeat="row in board">
             <div ng-repeat="cell in row" class="cell {{cell.myClass}}" ng-click="cellClicked(cell)"
-                 ng-right-click="flagToggle(cell)">{{cell.val1}}
+                  ng-dblclick="destroySurrounding(cell)" ng-right-click="flagToggle(cell)">{{cell.val1}}
             </div>
         </div>
         <div class="btn-group destroy" ng-hide="destroyBtn">

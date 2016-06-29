@@ -55,6 +55,16 @@ var colorClasses = {
     7: 'darkblue',
     8: 'purple',
     9: 'red'
+};
+
+var faceUrls = {
+    0: 'images/hugging-face.png',
+    1: 'images/astonished-face.png',
+    2: 'images/smiling-face-with-sunglasses.png',
+    3: 'images/grimacing-face.png',
+    4: 'images/flushed-face.png',
+    5: 'images/grinning-face.png',
+    6: 'images/crying-face.png',
 }
 
 var assignMines = function (i, j) {
@@ -99,6 +109,11 @@ mymod.service('flagService', class FlagService {
         this.flags = numOfMines;
         this.time = true;
         this.showDiff = false;
+        this.faceUrl = faceUrls[0];
+    }
+
+    setFaceUrl(url) {
+        this.faceUrl = url;
     }
 
     stopCounter() {
@@ -131,41 +146,39 @@ mymod.directive('ngRightClick', function ngRightClick($parse) {
     };
 });
 
+
 mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
     $scope.flagService = flagService;
     var timer;
     $scope.counter = 0;
 
     $scope.hoverEnter = function () {
-        console.log("enter");
-        var elem = document.getElementById('emoji');
-        console.log(elem);
-        elem.setAttribute('src', 'images/smiling-face-with-sunglasses.png');
-
+        flagService.setFaceUrl(faceUrls[2]);
     };
 
     $scope.hoverLeave = function () {
-        console.log("leave");
-        var elem = document.getElementById('emoji');
-        console.log(elem);
-        elem.setAttribute('src', 'images/hugging-face.png');
+        flagService.setFaceUrl(faceUrls[0]);
     };
 
     $scope.clickEmoji = function () {
-        console.log("click");
-        var elem = document.getElementById('emoji');
-        console.log(elem);
-        elem.setAttribute('src', 'images/astonished-face.png');
+        flagService.setFaceUrl(faceUrls[4]);
     };
 
     $scope.unclickEmoji = function () {
-        console.log("click");
-        var elem = document.getElementById('emoji');
-        console.log(elem);
-        elem.setAttribute('src', 'images/grimacing-face.png');
+        flagService.setFaceUrl(faceUrls[3]);
     };
 
 
+    $scope.setFace = function () {
+        var elem = document.getElementById('emoji');
+        elem.setAttribute('src', flagService.faceUrl);
+        // flagService.setFaceUrl(faceUrls[3]);
+    };
+    
+    $scope.faceUrlSrc = flagService.faceUrl;
+
+    
+    
     $scope.stopCounter = function () {
         $timeout.cancel(timer);
     };
@@ -188,7 +201,6 @@ mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
 });
 
 var restartGame = function () {
-    console.log("Restart Game!");
     rows = localStorage.getItem('rows');
     columns = localStorage.getItem('columns');
     numOfMines = localStorage.getItem('numOfMines');
@@ -221,15 +233,11 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     $scope.flagService = flagService;
 
     // popover
-    $scope.checkReload = function () {
-        console.log('TEST');
-    };
-
     $scope.dynamicPopover = {
         templateUrl: 'myPopoverTemplate.html',
-        rows: 5,
-        columns: 6,
-        mines: 6
+        rows: defaultRows,
+        columns: defaultColumns,
+        mines: defaultNumOfMines
     };
 
     $scope.placement = {
@@ -276,10 +284,8 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     };
     // end modal section
 
-    $scope.face = "4";// TODO: find a way to engage icon
-
-
     $scope.resetBoard = function () {
+
         flagService.toggleShowDiff();
         $scope.canClick = true;
         flagService.setFlags(localStorage.getItem('numOfMines'));
@@ -295,6 +301,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
                 }
             }
         }
+        flagService.setFaceUrl(faceUrls[0]);
     };
 
     $scope.resetBoard();
@@ -305,6 +312,29 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
 
     var checkGameWon = function () {
         return (revCounter + mines.length === rows * columns);
+    };
+
+    $scope.destroySurrounding = function (cell) {
+        var revealSurrounding = function (i, j) {
+            for (var k = Math.max(0, i - 1); k < Math.min(rows, i + 2); k++) {
+                for (var l = Math.max(0, j - 1); l < Math.min(columns, j + 2); l++) {
+                    if (i === k && j === l) {
+                        continue;
+                    }
+                    if (valArr[k][l]['value'] !== flagCode) {
+                        $scope.cellClicked($scope.board[k][l]);
+                    }
+                }
+            }
+        };
+
+        for (var i = 0; i < rows; i++) {
+            for (var j = 0; j < columns; j++) {
+                if ($scope.board[i][j] === cell) {
+                    revealSurrounding(i, j);
+                }
+            }
+        }
     };
 
     $scope.destroyTiles = function () {
@@ -358,8 +388,6 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     $scope.destroyBtn = true;
 
 
-    // $scope.diffSettings = flagService.getDiffSettingsStatus();
-
     $scope.toggle = function (state) {
         $scope.destroyBtn = state;
     };
@@ -387,7 +415,6 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
                 }
             }
         }
-        console.log('flags: ', flagService.flags, ' | mines: ', numOfMines);
         if (flagService.flags === 0) {
             $scope.toggle(false);
         }
@@ -427,7 +454,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
     var showAllMines = function () {
         for (var i = 0; i < $scope.board.length; i++) {
             for (var j = 0; j < $scope.board[i].length; j++) {
-                if ($scope.board[i][j].val1 === explosionCode){
+                if ($scope.board[i][j].val1 === explosionCode) {
                     continue;
                 }
                 if (valArr[i][j]['value'] === mineCode) {
@@ -458,12 +485,14 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
             $scope.message = "Good Job! You Won!";
             $scope.open();
             showAllMines();
+            flagService.setFaceUrl(faceUrls[5]);
             flagService.stopCounter();
         }
         else {
-            $scope.message = "You Lost.";
+            $scope.message = "You Lose.";
             $scope.open();
             showAllMines();
+            flagService.setFaceUrl(faceUrls[6]);
             flagService.stopCounter();
         }
         flagService.toggleShowDiff();
