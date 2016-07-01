@@ -198,12 +198,15 @@ minesweeper.controller('HeaderController', function ($scope, $rootScope, $timeou
     $scope.selectedImg = {};
 
     $scope.stopCounter = function () {
+        console.log("Stop Counter");
         $timeout.cancel(timer);
     };
 
 
     $scope.updateCounter = function () {
+        console.log("Update Counter");
         flagService.incrementCounter();
+        $timeout.cancel(timer);
         timer = $timeout($scope.updateCounter, 1000);
     };
 
