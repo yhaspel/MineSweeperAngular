@@ -1,4 +1,4 @@
-h1, h3, h2, h4 {
+h1, h3, h2, h4, h5 {
     text-align: center;
     font-style: italic;
 }
@@ -214,9 +214,21 @@ span:hover {
 
 .difficultySettings {
     transition: all linear 0.3s;
-    height: 2.5em;
+    height: 8em;
 }
 
 .difficultySettings.ng-hide {
     opacity: 0;
+    height: 0;
+}
+
+.help {
+    transition: all linear 1s;
+    height: 35em;
+}
+
+.help.ng-hide {
+    opacity: 0;
+    height: 0;
+
 }

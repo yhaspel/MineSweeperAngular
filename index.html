@@ -13,54 +13,68 @@
     </style>
 </head>
 <body>
-<h1>Minesweeper</h1>
-<h4 class="author">by Yuval Haspel</h4>
+
 <div ng-if="false">
     LOADING....
 </div>
 
 
-<div id="foo" class="ng-cloak">
+<div id="minesweeperBoard" class="ng-cloak">
+    <div ng-controller="HelpController">
+        <h1 ng-click="toggleHelp()">Minesweeper</h1>
+        <h4 class="author">by Yuval Haspel</h4>
+        <div class="help" ng-hide="helpToggle">
+            <hr>
+            <h5>Help</h5>
+            <p><b>Click on tile</b> - reveals the tile. If contained a mine, it's game over! Otherwise, it should reveal
+                a
+                counter indicating the number of surrounding mines immediately adjacent to the tile you just opened.
+                Clicking on
+                a 0 count tile, will open all adjacent 0 tiles and all 0 count tile immediate bordering tiles.<br>
+                <b>Right click on tile</b> - places a flag on the tile indicating this is where you think there might be
+                a
+                mine,
+                rendering this tile disabled until you right click it again to remove the flag.<br>
+                <b>Double click a tile</b> - to destroy adjacent 8 tiles. Flagged tiles will not be destroyed.<br>
+                <b>Once all flags have been placed</b> - a red "destroy all" button appears allowing you to destroy all
+                but
+                the
+                flagged tiles.<br>
+                <b>Once game is over:</b><br>
+                - green flags means you are correct in your guess<br>
+                - red flags mean you were wrong in your guess<br>
+                - collission icon means this is the mine you "stepped" on<br>
+                - bomb icon reveals all unflagged mines<br>
+                <br>
+                <b>Reveal Cheat Sheet</b> - right-click on emoji, then look at your dev tools console.
+                <b>A winning or losing message appears with each game over.</b>
+            </p>
+            <hr>
+        </div>
+    </div>
+
+
     <div class='gamestats' ng-controller="HeaderController">
         <input type="hidden" ng-bind="changeVal()" ng-value="{{mines}}">
         <div class="mineDisplay">{{mines}}</div>
         </input>
 
-        <div ng-mouseup="unclickEmoji()" ng-mousedown="clickEmoji()" ng-mouseleave="hoverLeave()" ng-mouseenter="hoverEnter()" class="faceDisplay" ng-click="flagService.toggleShowDiff()">
+        <div ng-right-click="printCheatsheet()" ng-mouseup="unclickEmoji()" ng-mousedown="clickEmoji()"
+             ng-mouseleave="hoverLeave()" ng-mouseenter="hoverEnter()" class="faceDisplay"
+             ng-click="flagService.toggleShowDiff()">
             <img ng-src="{{flagService.faceUrl}}" id="emoji">
         </div>
 
-        <input type="hidden" ng-bind="remoteStop()" ng-value="{{counter}}">
+        <input type="hidden" ng-bind="remoteStop()" ng-value="{{flagService.counter}}">
         <div class="timeDisplay">
-            {{counter}}
+            {{flagService.counter}}
         </div>
         </input>
     </div>
 
     <div class='container' ng-controller="BoardController">
-        <script type="text/ng-template" id="myModalContent.html">
-            <div class="modal-header">
-                <h3 class="modal-title">Game Over</h3>
-            </div>
-            <div class="modal-body">
-                <h2>{{ messsge }}</h2>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
-            </div>
-        </script>
-
-        <div class="boardRow" ng-repeat="row in board">
-            <div ng-repeat="cell in row" class="cell {{cell.myClass}}" ng-click="cellClicked(cell)"
-                  ng-dblclick="destroySurrounding(cell)" ng-right-click="flagToggle(cell)">{{cell.val1}}
-            </div>
-        </div>
-        <div class="btn-group destroy" ng-hide="destroyBtn">
-            <div class="btn btn-danger" ng-click="destroyTiles()">Destroy All</div>
-        </div>
-
         <div class="difficultySettings" ng-hide="flagService.showDiff">
-            <h4>Difficulty</h4>
+            <h4>Select Difficulty</h4>
             <div class="btn-group">
                 <div class="btn btn-default" uib-popover="Easy" popover-trigger="mouseenter"
                      ng-click="restartGame('easy')">
@@ -88,6 +102,27 @@
                     </div>
                 </script>
             </div>
+        </div>
+
+        <script type="text/ng-template" id="myModalContent.html">
+            <div class="modal-header">
+                <h3 class="modal-title">Game Over</h3>
+            </div>
+            <div class="modal-body">
+                <h2>{{ messsge }}</h2>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+            </div>
+        </script>
+
+        <div class="boardRow" ng-repeat="row in board">
+            <div ng-repeat="cell in row" class="cell {{cell.myClass}}" ng-click="cellClicked(cell)"
+                 ng-dblclick="destroySurrounding(cell)" ng-right-click="flagToggle(cell)">{{cell.val1}}
+            </div>
+        </div>
+        <div class="btn-group destroy" ng-hide="destroyBtn">
+            <div class="btn btn-danger" ng-click="destroyTiles()">Destroy All</div>
         </div>
     </div>
 </div>

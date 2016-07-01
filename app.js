@@ -15,7 +15,7 @@ var columns = localStorage.getItem('columns');
 var numOfMines = localStorage.getItem('numOfMines');
 
 var revCounter = 0;
-var mymod = angular.module("mymodule", ['ui.bootstrap', 'ngAnimate']);
+var minesweeper = angular.module("mymodule", ['ui.bootstrap', 'ngAnimate']);
 var valArr = [];
 
 var mineCode = "\uD83D\uDCA3";
@@ -104,20 +104,33 @@ var assignProximityCount = function () {
 };
 
 
-mymod.service('flagService', class FlagService {
+minesweeper.service('flagService', class FlagService {
     constructor() {
         this.flags = numOfMines;
         this.time = true;
         this.showDiff = false;
         this.faceUrl = null;
+        this.counter = 0;
     }
 
     setFaceUrl(url) {
         this.faceUrl = url;
     }
 
+    incrementCounter() {
+        this.counter++;
+    }
+
+    setCounter(val) {
+        this.counter = val;
+    }
+
     stopCounter() {
         this.time = false;
+    }
+
+    startCounter() {
+        this.time = true;
     }
 
     setFlags(flags) {
@@ -128,17 +141,17 @@ mymod.service('flagService', class FlagService {
         this.showDiff = !this.showDiff;
     }
 
-    setShowDiff(status){
+    setShowDiff(status) {
         this.showDiff = status;
     }
 });
 
 
-mymod.run(function yuval($rootScope) {
+minesweeper.run(function yuval($rootScope) {
     $rootScope.x = "ROOT!";
 });
 
-mymod.directive('ngRightClick', function ngRightClick($parse) {
+minesweeper.directive('ngRightClick', function ngRightClick($parse) {
     return function (scope, element, attrs) {
         var fn = $parse(attrs.ngRightClick);
         element.bind('contextmenu', function (event) {
@@ -150,11 +163,17 @@ mymod.directive('ngRightClick', function ngRightClick($parse) {
     };
 });
 
+minesweeper.controller("HelpController", function HelpController($scope) {
+    $scope.helpToggle = true;
+    $scope.toggleHelp = function () {
+        $scope.helpToggle = !$scope.helpToggle;
+    };
+});
 
-mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
+
+minesweeper.controller('HeaderController', function ($scope, $rootScope, $timeout, flagService) {
     $scope.flagService = flagService;
     var timer;
-    $scope.counter = 0;
 
     $scope.hoverEnter = function () {
         flagService.setFaceUrl(faceUrls[2]);
@@ -172,25 +191,39 @@ mymod.controller('HeaderController', function ($scope, $timeout, flagService) {
         flagService.setFaceUrl(faceUrls[3]);
     };
 
-
     $scope.setFace = function () {
         $scope.selectedImg.src = flagService.faceUrl;
     };
 
     $scope.selectedImg = {};
-    
+
     $scope.stopCounter = function () {
         $timeout.cancel(timer);
     };
+
+
     $scope.updateCounter = function () {
-        $scope.counter++;
+        flagService.incrementCounter();
         timer = $timeout($scope.updateCounter, 1000);
     };
-    $scope.updateCounter();
+
+    $rootScope.$on("startTheClock", function () {
+        flagService.startCounter();
+        flagService.setCounter(0);
+        $scope.updateCounter();
+    });
 
     $scope.remoteStop = function () {
         if (!flagService.time) {
             $scope.stopCounter();
+        }
+    };
+
+    $scope.printCheatsheet = function () {
+        console.log('Mine Cheat Sheet:')
+
+        for (var i = 0; i < mines.length; i++) {
+            console.log(mines[i]);
         }
     };
 
@@ -212,11 +245,6 @@ var restartGame = function () {
     valArr = [];
     mines = generateRandomMines(numOfMines);
 
-    // mine cheatsheet
-    for (var i = 0; i < mines.length; i++) {
-        console.log(mines[i]);
-    }
-
     // initiate value array
     for (var i = 0; i < rows; i++) {
         valArr[i] = [];
@@ -229,7 +257,7 @@ var restartGame = function () {
 }
 
 
-mymod.controller("BoardController", function BoardController($scope, $uibModal, $log, $sce, flagService) {
+minesweeper.controller("BoardController", function BoardController($scope, $rootScope, $uibModal, $log, $sce, flagService) {
     $scope.flagService = flagService;
 
     // popover
@@ -240,6 +268,8 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
         mines: defaultNumOfMines
     };
 
+
+    // Tentative. consider removing once design is finalized or change according to board size
     $scope.placement = {
         options: [
             'top',
@@ -302,6 +332,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
             }
         }
         flagService.setFaceUrl(faceUrls[0]);
+        $rootScope.$emit("startTheClock", {});
     };
 
     $scope.resetBoard();
@@ -533,7 +564,7 @@ mymod.controller("BoardController", function BoardController($scope, $uibModal, 
 });
 
 
-mymod.controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, message) {
+minesweeper.controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, message) {
     $scope.messsge = message;
     $scope.ok = function () {
         $uibModalInstance.close($scope.message);
@@ -552,9 +583,6 @@ var init = function () {
         location.reload();
     }
 
-    localStorage.setItem('rows', defaultRows);
-    localStorage.setItem('columns', defaultColumns);
-    localStorage.setItem('numOfMines', defaultNumOfMines);
     restartGame();
 };
 
