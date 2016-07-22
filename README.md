@@ -4,6 +4,8 @@ Created by Yuval Haspel
 
 To play game, go to: http://yuvalh.superbootcamp.tech/
 
+For game screenshots, go to screenshots/ directory within project
+
 *	To reveal game help, click on the "Minesweeper" title
 
 *	Game controls:
