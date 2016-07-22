@@ -4,9 +4,9 @@ Created by Yuval Haspel
 
 To play game, go to: http://yuvalh.superbootcamp.tech/
 
-1.	To reveal game help, click on the "Minesweeper" title
+*	To reveal game help, click on the "Minesweeper" title
 
-2.	Game controls:
+*	Game controls:
 
 a.	Click on tile - reveals the tile. If contained a mine, it's game over! 
 Otherwise, it should reveal a counter indicating the number of surrounding mines immediately adjacent to the tile you just opened. 
@@ -27,5 +27,5 @@ Once game is over:
 
 A winning or losing message appears with each game over.
 
-3.	Play and enjoy!
+*	Play and enjoy!
 
